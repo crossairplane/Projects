@@ -2,6 +2,9 @@ import sys
 import pandas as pd
 import numpy as np
 import nltk
+nltk.download('punkt')
+nltk.download('wordnet')
+nltk.download('omw-1.4')
 
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
@@ -18,12 +21,12 @@ from sqlalchemy import create_engine
 import pickle
 
 def load_data(database_filepath):
-    
+
     engine = create_engine('sqlite:///'+database_filepath)
     df = pd.read_sql_table('dataset', con=engine)
 
-    
-    df = df.dropna() 
+
+    df = df.dropna()
 
     X = df.loc[:, 'message']
     Y = df.iloc[:, 4:]
@@ -33,17 +36,17 @@ def load_data(database_filepath):
 
 
 def tokenize(text):
-    
+
     tokens = word_tokenize(text)
     wl = WordNetLemmatizer()
-   
+
     tokens = [wl.lemmatize(t).lower().strip() for t in tokens]
 
     return tokens
 
 
 def build_model(parameters={}):
-    
+
     pipeline = Pipeline([('vect', CountVectorizer(tokenizer = tokenize)),
                             ('tfidf', TfidfTransformer()),
                             ('classifier', MultiOutputClassifier(RandomForestClassifier(**parameters)))])
@@ -51,7 +54,7 @@ def build_model(parameters={}):
 
 
 def optimal_params(model, X_train, Y_train):
-    
+
     parameters = {
         'classifier__estimator__n_estimators': [50, 100, 150],
         'classifier__estimator__max_features': ['sqrt',],
@@ -64,10 +67,10 @@ def optimal_params(model, X_train, Y_train):
     return cv.best_params_
 
 def evaluate_model(model, X_test, Y_test, category_names):
-    
+
     predictions = model.predict(X_test)
-    
-   
+
+
     print("Accuracy scores for each category\n")
     print("*-" * 30)
 
@@ -76,7 +79,7 @@ def evaluate_model(model, X_test, Y_test, category_names):
 
 
 def save_model(model, model_filepath):
-    
+
     pickle.dump(model, open(model_filepath, "wb"))
 
 
@@ -89,7 +92,7 @@ def main():
 
         print('Building model...')
         model = build_model()
-        
+
         print('Grid search started')
         optimal_parameters = optimal_params(model, X_train, Y_train)
         random_forest_params = {
@@ -106,7 +109,7 @@ def main():
 
         print('Training model...')
         model.fit(X_train, Y_train)
-        
+
         print('Evaluating model...')
         evaluate_model(model, X_test, Y_test, category_names)
 
