@@ -51,4 +51,4 @@ In this project, we built an ETL pipeline and an Machine Learning pipeline to an
     eg. http://192.168.0.108:3001
 
 - Results:
-Check pictures [main_page](https://github.com/crossairplane/Projects/blob/main/Project_2_Disaster_Pesponse_Project/images/main_page.png) and [message_to_predict](https://github.com/crossairplane/Projects/blob/main/Project_2_Disaster_Pesponse_Project/images/message_to_predict_genres.png).
+Check pictures ！[main_page](https://github.com/crossairplane/Projects/blob/main/Project_2_Disaster_Pesponse_Project/images/main_page.png) and ！[message_to_predict](https://github.com/crossairplane/Projects/blob/main/Project_2_Disaster_Pesponse_Project/images/message_to_predict_genres.png).
