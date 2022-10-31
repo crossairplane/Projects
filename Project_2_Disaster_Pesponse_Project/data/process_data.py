@@ -3,8 +3,18 @@ import pandas as pd
 from sqlalchemy import create_engine
 
 def load_data(messages_filepath, categories_filepath):
-    
-    
+    '''
+    load_data
+    Load data from csv files and merge to a single pandas dataframe
+
+    Input:
+    messages_filepath filepath to messages csv file
+    categories_filepath filepath to categories csv file
+
+    Returns:
+    df dataframe merging catrgories and messages
+    '''
+
     messages = pd.read_csv(messages_filepath)
     categories = pd.read_csv(categories_filepath)
 
@@ -16,23 +26,34 @@ def load_data(messages_filepath, categories_filepath):
     category_colnames = list(map(lambda x:x[:-2], row))
     categories.columns = category_colnames
 
-    
+
     for column in categories:
         categories[column] = categories[column].apply(lambda x:int(x[-1]))
+    categories.drop(categories[categories['related']==2].index, inplace=True)
 
-    
     df.drop('categories', axis=1, inplace=True)
 
-    
-    
+
+
+
     df = pd.concat([df, categories], axis = 1)
 
     return df
 
 
 def clean_data(df):
-    
-    
+    '''
+    clean_data
+    Clean data from categories and messages dataframe
+
+    Input:
+    merged catrgories and messages dataframe
+
+    Returns:
+    New dataframe without duplicated rows.
+    '''
+
+
     df["is_duplicate"]= df.duplicated()
     df = df[df['is_duplicate'] == False]
     df.drop('is_duplicate', axis=1, inplace=True)
@@ -40,9 +61,20 @@ def clean_data(df):
     return df
 
 def save_data(df, database_filename):
-   
+    '''
+    save_data
+    Save clean data to a database.
+
+    Input:
+    df clean dataframe
+    database_filename the name of database we created
+
+    Returns:
+    a databas.
+    '''
+
     engine = create_engine('sqlite:///'+database_filename)
-    df.to_sql('dataset', engine, index=False)
+    df.to_sql('dataset', engine, index=False, if_exists='replace')
 
 
 def main():
@@ -56,12 +88,12 @@ def main():
 
         print('Cleaning data...')
         df = clean_data(df)
-        
+
         print('Saving data...\n    DATABASE: {}'.format(database_filepath))
         save_data(df, database_filepath)
-        
+
         print('Cleaned data saved to database!')
-    
+
     else:
         print('Please provide the filepaths of the messages and categories '\
               'datasets as the first and second argument respectively, as '\

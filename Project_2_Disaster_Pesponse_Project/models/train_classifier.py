@@ -21,6 +21,18 @@ from sqlalchemy import create_engine
 import pickle
 
 def load_data(database_filepath):
+    '''
+    load_data
+    Load data from the database we created with clean data.
+
+    Input:
+    database_filepath filepath of cleaned database
+
+    Returns:
+    X.values messages we use in models
+    Y.values the category we need to target
+    categories the categories' names
+    '''
 
     engine = create_engine('sqlite:///'+database_filepath)
     df = pd.read_sql_table('dataset', con=engine)
@@ -36,41 +48,61 @@ def load_data(database_filepath):
 
 
 def tokenize(text):
+    '''
+    Input:
+    text: original text messages
+
+    Output:
+    tokens: Tokenized, Lemmatize, cleaned data
+    '''
 
     tokens = word_tokenize(text)
-    wl = WordNetLemmatizer()
+    lemmatizer = WordNetLemmatizer()
 
-    tokens = [wl.lemmatize(t).lower().strip() for t in tokens]
+    tokens = [lemmatizer.lemmatize(t).lower().strip() for t in tokens]
 
     return tokens
 
 
-def build_model(parameters={}):
+def build_model():
+    '''
+    Build Machine Learning model using tf-idf, randomforest and Grid Search
 
-    pipeline = Pipeline([('vect', CountVectorizer(tokenizer = tokenize)),
-                            ('tfidf', TfidfTransformer()),
-                            ('classifier', MultiOutputClassifier(RandomForestClassifier(**parameters)))])
-    return pipeline
+    Output:
+    cv : GridSearchCV results
+    '''
 
-
-def optimal_params(model, X_train, Y_train):
+    pipeline = Pipeline([
+        ("vect" , CountVectorizer(tokenizer=tokenize)),
+        ("tfidf" , TfidfTransformer()),
+        ("clf" , RandomForestClassifier())
+    ])
 
     parameters = {
-        'classifier__estimator__n_estimators': [50, 100, 150],
-        'classifier__estimator__max_features': ['sqrt',],
-        'classifier__estimator__criterion': ['entropy', 'gini']
+        'clf__n_estimators': [5, 6, 7],
+        'clf__min_samples_split': [2, 3, 4]
     }
 
-    cv = GridSearchCV(model, param_grid = parameters, verbose=1)
-    cv.fit(X_train, Y_train)
+    cv = GridSearchCV(pipeline, param_grid=parameters)
 
-    return cv.best_params_
+    return cv
 
 def evaluate_model(model, X_test, Y_test, category_names):
+    '''
+    evaluate_model
+    Evaluate the performance of model.
+
+    Input:
+    model: your model
+    X_test: Tesing data to input
+    Y_test: Tesing data with labels
+    category_names: The category names
+
+    Output:
+    Accuracy scores for each category
+    '''
 
     predictions = model.predict(X_test)
-
-
     print("Accuracy scores for each category\n")
     print("*-" * 30)
 
@@ -79,6 +111,17 @@ def evaluate_model(model, X_test, Y_test, category_names):
 
 
 def save_model(model, model_filepath):
+    '''
+    save_model
+    Save model to a filepath.
+
+    Input:
+    model: The name of model
+    model_filepath: Filepath to save
+
+    Returns:
+    A pickle file.
+    '''
 
     pickle.dump(model, open(model_filepath, "wb"))
 
@@ -93,22 +136,10 @@ def main():
         print('Building model...')
         model = build_model()
 
-        print('Grid search started')
-        optimal_parameters = optimal_params(model, X_train, Y_train)
-        random_forest_params = {
-                    'n_estimators': optimal_parameters['classifier__estimator__n_estimators'],
-                    'max_features': optimal_parameters['classifier__estimator__max_features'],
-                    'criterion': optimal_parameters['classifier__estimator__criterion'],
-                }
-
-        print("Optimal parameters")
-        print(random_forest_params)
-
-        print('Building random forest model with optimal parameters')
-        model = build_model(random_forest_params)
-
         print('Training model...')
         model.fit(X_train, Y_train)
+
+        predictions = model.predict(X_test)
 
         print('Evaluating model...')
         evaluate_model(model, X_test, Y_test, category_names)
