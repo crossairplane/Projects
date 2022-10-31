@@ -10,9 +10,9 @@ In this project, we built an ETL pipeline and an Machine Learning pipeline to an
   - app
 
     | - templates
-
+    
     | |- master.html # main page of web app
-
+    
     | |- go.html # classification result page of web app
 
     |- run.py # Flask file that runs app
@@ -31,8 +31,10 @@ In this project, we built an ETL pipeline and an Machine Learning pipeline to an
 
     |- classifier.pkl # saved model
 
-  - images # not used in program, just a demo.
+  - images # not used in this program, just a demo.
+  
     |- main_page.png
+    
     |- message_to_predict_genres.png
   - README.md
 
