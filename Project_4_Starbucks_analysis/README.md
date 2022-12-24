@@ -26,8 +26,7 @@ Here is the schema and explanation of each variable in the files:
 - time (int) - time in hours since start of test. The data begins at time t=0
 - value - (dict of strings) - either an offer id or transaction amount depending on the record
 
-# Table structure
-![image]（https://github.com/crossairplane/Projects/blob/main/Project_4_Starbucks_analysis/table%20structure.png）
 
 # Motivation
-To analyse the customers behaviors and increase conversion or purchase rates. And I write a article about it.
+To analyse the customers behaviors and increase conversion or purchase rates. And I write a article about it:
+http://crossairplane.xyz/2022/12/24/2022-12-24-Starbucks-analysis/
